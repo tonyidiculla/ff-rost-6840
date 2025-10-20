@@ -1,22 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { validateRosterAccess, extractEntityPlatformId } from '@/lib/subscription'
-import { z } from 'zod'
+import { validateRosterAccess } from '@/lib/subscription'
 
-// Validation schema for staff creation
-const createStaffSchema = z.object({
-  entity_platform_id: z.string().uuid(),
-  user_platform_id: z.string(),
-  employee_id: z.string().optional(),
-  full_name: z.string().min(1).max(255),
-  email: z.string().email().optional(),
-  phone: z.string().optional(),
-  role_type: z.string().min(1).max(100),
-  job_title: z.string().optional(),
-  slot_duration_minutes: z.number().int().min(5).max(480).default(15),
-  can_take_appointments: z.boolean().default(true),
-  hire_date: z.string().datetime().optional(),
-})
+// This endpoint provides READ-ONLY access to staff data for scheduling purposes
+// Staff management (CRUD operations) should be handled by the ff-hr microservice
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,6 +11,7 @@ export async function GET(request: NextRequest) {
     const entityId = searchParams.get('entity_id')
     const activeOnly = searchParams.get('active_only') !== 'false'
     const roleType = searchParams.get('role_type')
+    const canTakeAppointments = searchParams.get('can_take_appointments')
 
     if (!entityId) {
       return NextResponse.json(
@@ -47,7 +35,127 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from('staff_members')
-      .select('*')
+      .select(`
+        id,
+        entity_platform_id,
+        user_platform_id,
+        employee_id,
+        full_name,
+        role_type,
+        job_title,
+        can_take_appointments,
+        is_active,
+        created_at,
+        updated_at
+      `)
+      .eq('entity_platform_id', entityId)
+
+    // Apply filters
+    if (activeOnly) {
+      query = query.eq('is_active', true)
+    }
+
+    if (roleType) {
+      query = query.eq('role_type', roleType)
+    }
+
+    if (canTakeAppointments !== null) {
+      query = query.eq('can_take_appointments', canTakeAppointments === 'true')
+    }
+
+    const { data: staff, error } = await query.order('full_name')
+
+    if (error) {
+      console.error('Database error:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch staff members' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: staff,
+      count: staff.length,
+      message: 'Staff data retrieved for scheduling purposes only. Use ff-hr microservice for staff management.'
+    })
+
+  } catch (error) {
+    console.error('Staff GET error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// Staff creation/update/deletion should be handled by ff-hr microservice
+export async function POST() {
+  return NextResponse.json(
+    { 
+      error: 'Staff management operations not supported',
+      message: 'Please use the ff-hr (Human Resources) microservice for creating, updating, or deleting staff members.',
+      redirect_to: 'ff-hr/api/staff'
+    },
+    { status: 405 }
+  )
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { 
+      error: 'Staff management operations not supported',
+      message: 'Please use the ff-hr (Human Resources) microservice for creating, updating, or deleting staff members.',
+      redirect_to: 'ff-hr/api/staff'
+    },
+    { status: 405 }
+  )
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { 
+      error: 'Staff management operations not supported',
+      message: 'Please use the ff-hr (Human Resources) microservice for creating, updating, or deleting staff members.',
+      redirect_to: 'ff-hr/api/staff'
+    },
+    { status: 405 }
+  )
+}
+
+// Staff creation/update/deletion should be handled by ff-hr microservice
+export async function POST() {
+  return NextResponse.json(
+    { 
+      error: 'Staff management operations not supported',
+      message: 'Please use the ff-hr (Human Resources) microservice for creating, updating, or deleting staff members.',
+      redirect_to: 'ff-hr/api/staff'
+    },
+    { status: 405 }
+  )
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { 
+      error: 'Staff management operations not supported',
+      message: 'Please use the ff-hr (Human Resources) microservice for creating, updating, or deleting staff members.',
+      redirect_to: 'ff-hr/api/staff'
+    },
+    { status: 405 }
+  )
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { 
+      error: 'Staff management operations not supported',
+      message: 'Please use the ff-hr (Human Resources) microservice for creating, updating, or deleting staff members.',
+      redirect_to: 'ff-hr/api/staff'
+    },
+    { status: 405 }
+  )
+}
       .eq('entity_platform_id', entityId)
 
     if (activeOnly) {

@@ -1,13 +1,16 @@
-# 🗓️ FF-Roster - Furfield Rostering & Scheduling Microservice
+# 🗓️ FF-Roster - Furfield Scheduling & Slot Management Microservice
 
-A dedicated microservice for staff scheduling and appointment slot management within the Furfield veterinary hospital management ecosystem. Built with **Next.js 15** and **Supabase**, designed to integrate seamlessly with other Furfield microservices.
+A dedicated microservice for staff scheduling, appointment slot management, and availability checking within the Furfield veterinary hospital management ecosystem. Built with **Next.js 15** and **Supabase**, designed to integrate seamlessly with other Furfield microservices.
+
+> **Note**: Staff management (CRUD operations for employees) is handled by the **ff-hr** (Human Resources) microservice. This service focuses on scheduling existing staff members.
 
 ## 🌟 Features
 
-- **Staff Management** - Create and manage staff members with role-based scheduling
-- **Schedule Configuration** - Weekly schedules with exceptions for holidays and leave
-- **Slot Availability** - Real-time 15-minute appointment slot checking
-- **Booking Management** - External booking integration for appointment systems
+- **Schedule Management** - Create and manage weekly schedules for existing staff
+- **Schedule Exceptions** - Handle holidays, sick days, and special schedule changes
+- **Slot Generation** - Automatically generate appointment slots based on staff schedules
+- **Availability Checking** - Real-time slot availability and booking status
+- **Multi-location Support** - Handle schedules across different hospital locations
 - **Subscription-Based Access** - Hospital subscription validation before API access
 - **Multi-Tenant** - Secure isolation between different hospital entities
 - **Real-time Updates** - Powered by Supabase realtime subscriptions
@@ -20,6 +23,11 @@ This microservice follows the Furfield microservices pattern:
 - **Subscription Middleware** for access control based on hospital module subscriptions
 - **TypeScript** for type safety and better developer experience
 - **Zod** for API validation and type inference
+
+### Integration with Other Services
+- **ff-hr**: Retrieves staff member information for scheduling
+- **ff-hms**: Provides appointment booking and patient management integration
+- **ff-auth**: Handles authentication and authorization
 
 ## 🚀 Quick Start
 
@@ -83,21 +91,51 @@ GET /api/health
 ```
 Returns service status and version information.
 
-#### 👥 Staff Management
+#### � Schedule Management
 
-**Get Staff Members**
+**Get Staff Schedules**
 ```http
-GET /api/staff?entity_id={entity_platform_id}&active_only=true&role_type=vet
+GET /api/schedules?entity_id={entity_platform_id}&staff_member_id={staff_id}&day_of_week=1
 ```
 
-**Create Staff Member**
+**Create Weekly Schedule**
 ```http
-POST /api/staff
+POST /api/schedules
 Content-Type: application/json
 
 {
   "entity_platform_id": "uuid",
-  "user_platform_id": "user_123",
+  "staff_member_id": "uuid",
+  "day_of_week": 1,
+  "start_time": "09:00",
+  "end_time": "17:00",
+  "is_available": true,
+  "effective_from": "2025-01-01T00:00:00.000Z",
+  "slot_duration_minutes": 15
+}
+```
+
+#### 🚫 Schedule Exceptions
+
+**Get Schedule Exceptions**
+```http
+GET /api/exceptions?entity_id={entity_platform_id}&start_date=2025-01-01&end_date=2025-01-31
+```
+
+**Create Schedule Exception**
+```http
+POST /api/exceptions
+Content-Type: application/json
+
+{
+  "entity_platform_id": "uuid",
+  "staff_member_id": "uuid",
+  "exception_date": "2025-12-25",
+  "exception_type": "holiday",
+  "is_available": false,
+  "reason": "Christmas Day"
+}
+```
   "employee_id": "EMP001",
   "full_name": "Dr. Sarah Johnson",
   "email": "sarah.johnson@hospital.com",
