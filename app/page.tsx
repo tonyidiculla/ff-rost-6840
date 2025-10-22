@@ -1,16 +1,12 @@
-export default function Home() {
+export default function RosteringPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            FF-Roster
-          </h1>
-          <p className="text-xl text-gray-600">
-            Furfield Rostering & Scheduling Microservice
-          </p>
-        </div>
-      </main>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center space-y-4">
+        <div className="text-6xl">🚧</div>
+        <h1 className="text-4xl font-bold text-gray-800">Coming Soon</h1>
+        <p className="text-xl text-gray-600">Rostering Module is under development</p>
+        <p className="text-sm text-gray-500">We're working hard to bring you this feature!</p>
+      </div>
     </div>
-  )
+  );
 }
